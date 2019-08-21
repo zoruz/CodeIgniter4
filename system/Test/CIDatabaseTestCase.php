@@ -67,20 +67,19 @@ class CIDatabaseTestCase extends CIUnitTestCase
 	protected $seed = '';
 
 	/**
-	 * The path to where we can find the migrations
-	 * and seeds directories. Allows overriding
-	 * the default application directories.
+	 * The path to where we can find the seeds directory.
+	 * Allows overriding the default application directories.
 	 *
 	 * @var string
 	 */
 	protected $basePath = TESTPATH . '_support/Database';
 
 	/**
-	 * The namespace to help us fird the migration classes.
+	 * The namespace to help us find the migration classes.
 	 *
 	 * @var string
 	 */
-	protected $namespace = 'Tests\Support';
+	protected $namespace = 'Tests\Support\DatabaseTestMigrations';
 
 	/**
 	 * The name of the database group to connect to.
@@ -188,8 +187,8 @@ class CIDatabaseTestCase extends CIUnitTestCase
 				}
 			}
 
-			$this->migrations->version(0, null, 'tests');
-			$this->migrations->latest(null, 'tests');
+			$this->migrations->regress(0, 'tests');
+			$this->migrations->progress('tests');
 		}
 
 		if (! empty($this->seed))

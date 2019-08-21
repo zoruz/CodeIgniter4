@@ -72,7 +72,7 @@ class MigrationRunnerTest extends CIDatabaseTestCase
 
 		$this->hasInDatabase('migrations', $history);
 
-		$this->assertEquals($history, $runner->getHistory()[0]);
+		$this->assertEquals($history, (array) $runner->getHistory()[0]);
 	}
 
 	public function testGetHistoryReturnsEmptyArrayWithNoResults()
@@ -173,20 +173,25 @@ class MigrationRunnerTest extends CIDatabaseTestCase
 		$config->type = 'timestamp';
 		$runner       = new MigrationRunner($config);
 
-		$runner = $runner->setPath(TESTPATH . '_support/Database/SupportMigrations');
+		$runner = $runner->setNamespace('Tests\Support\MigrationTestMigrations');
 
 		$mig1 = (object)[
-							'name'    => 'Some_migration',
-							'path'    => TESTPATH . '_support/Database/SupportMigrations/2018-01-24-102301_Some_migration.php',
-							'version' => '2018-01-24-102301',
-							'class'   => 'App\Database\Migrations\Migration_some_migration',
+							'name'      => 'Some_migration',
+							'path'      => TESTPATH . '_support/MigrationTestMigrations/Database/Migrations/2018-01-24-102301_Some_migration.php',
+							'version'   => '2018-01-24-102301',
+							'class'     => 'Tests\Support\MigrationTestMigrations\Database\Migrations\Migration_some_migration',
+							'namespace' => 'Tests\Support\MigrationTestMigrations',
 						];
+		$mig1->uid = $runner->getObjectUid($mig1);
+
 		$mig2 = (object)[
-							'name'    => 'Another_migration',
-							'path'    => TESTPATH . '_support/Database/SupportMigrations/2018-01-24-102302_Another_migration.php',
-							'version' => '2018-01-24-102302',
-							'class'   => 'App\Database\Migrations\Migration_another_migration',
+							'name'      => 'Another_migration',
+							'path'      => TESTPATH . '_support/MigrationTestMigrations/Database/Migrations/2018-01-24-102302_Another_migration.php',
+							'version'   => '2018-01-24-102302',
+							'class'     => 'Tests\Support\MigrationTestMigrations\Database\Migrations\Migration_another_migration',
+							'namespace' => 'Tests\Support\MigrationTestMigrations',
 						];
+		$mig1->uid = $runner->getObjectUid($mig1);
 
 		$migrations = $runner->findMigrations();
 
@@ -210,14 +215,14 @@ class MigrationRunnerTest extends CIDatabaseTestCase
 		$runner = $runner->setPath($this->start);
 
 		vfsStream::copyFromFileSystem(
-			TESTPATH . '_support/Database/SupportMigrations',
+			TESTPATH . '_support/MigrationTestMigrations/Database/Migrations',
 			$this->root
 		);
 
 		$this->expectException(ConfigException::class);
 		$this->expectExceptionMessage('Migrations have been loaded but are disabled or setup incorrectly.');
 
-		$runner->version(1);
+		$runner->progress();
 	}
 
 	public function testVersionReturnsUpDownSuccess()
@@ -230,29 +235,32 @@ class MigrationRunnerTest extends CIDatabaseTestCase
 		$runner->setSilent(false);
 		$runner->clearHistory();
 
-		$runner = $runner->setPath(TESTPATH . '_support/Database/SupportMigrations');
+		$runner = $runner->setNamespace('Tests\Support\MigrationTestMigrations');
 
-		$version = $runner->version('2018-01-24-102301');
+		$runner->progress();
+		$version = $runner->getBatchEnd($runner->getLastBatch());
 
-		$this->assertEquals('2018-01-24-102301', $version);
+		$this->assertEquals('2018-01-24-102302', $version);
 		$this->seeInDatabase('foo', ['key' => 'foobar']);
 
-		$version = $runner->version(0);
+		$runner->version(0);
+		$version = $runner->getBatchEnd($runner->getLastBatch());
 
 		$this->assertEquals('0', $version);
 		$this->assertFalse($this->db->tableExists('foo'));
 	}
 
-	public function testLatestSuccess()
+	public function testProgressSuccess()
 	{
 		$config = $this->config;
 		$runner = new MigrationRunner($config);
 		$runner->setSilent(false);
 		$runner->clearHistory();
 
-		$runner = $runner->setPath(TESTPATH . '_support/Database/SupportMigrations');
+		$runner = $runner->setNamespace('Tests\Support\MigrationTestMigrations');
 
-		$version = $runner->latest();
+		$runner->progess();
+		$version = $runner->getBatchEnd($runner->getLastBatch());
 
 		$this->assertEquals('2018-01-24-102302', $version);
 		$this->assertTrue(db_connect()->tableExists('foo'));
@@ -262,16 +270,17 @@ class MigrationRunnerTest extends CIDatabaseTestCase
 		]);
 	}
 
-	public function testVersionReturnsDownSuccess()
+	public function testRegressSuccess()
 	{
 		$config = $this->config;
 		$runner = new MigrationRunner($config);
 		$runner->setSilent(false);
 
-		$runner = $runner->setPath(TESTPATH . '_support/Database/SupportMigrations');
-		$runner->latest();
+		$runner = $runner->setNamespace('Tests\Support\MigrationTestMigrations');
+		$runner->progress();
 
-		$version = $runner->version(0);
+		$runner->regress();
+		$version = $runner->getBatchEnd($runner->getLastBatch());
 
 		$this->assertEquals(0, $version);
 		$this->assertFalse(db_connect()->tableExists('foo'));
@@ -288,23 +297,18 @@ class MigrationRunnerTest extends CIDatabaseTestCase
 		$runner->clearHistory();
 		$this->resetTables();
 
-		$runner = $runner->setPath(TESTPATH . '_support/Database/SupportMigrations');
+		$runner = $runner->setNamespace('Tests\Support\MigrationTestMigrations');
 
-		$version = $runner->version('2018-01-24-102301');
+		$runner->progess();
+		$version = $runner->getBatchEnd($runner->getLastBatch());
 
 		$this->assertEquals('2018-01-24-102301', $version);
 
 		$history = $runner->getHistory('tests');
-		$this->assertEquals(1, $history[0]['batch']);
+		$this->assertEquals(1, $history[0]->batch);
 
-		$version = $runner->version('2018-01-24-102302');
-
-		$this->assertEquals('2018-01-24-102302', $version);
-
-		$history = $runner->getHistory('tests');
-
-		$this->assertEquals(1, $history[0]['batch']);
-		$this->assertEquals(2, $history[1]['batch']);
+		$this->assertEquals(1, $history[0]->batch);
+		$this->assertEquals(2, $history[1]->batch);
 
 		$this->seeInDatabase('migrations', [
 			'batch' => 1,
@@ -319,9 +323,9 @@ class MigrationRunnerTest extends CIDatabaseTestCase
 		$runner->clearHistory();
 		$this->resetTables();
 
-		$runner = $runner->setPath(TESTPATH . '_support/Database/SupportMigrations');
+		$runner = $runner->setNamespace('Tests\Support\MigrationTestMigrations');
 
-		$runner->latest();
+		$runner->progress();
 
 		$this->assertEquals('2018-01-24-102301', $runner->getBatchStart(1));
 		$this->assertEquals('2018-01-24-102302', $runner->getBatchEnd(1));
