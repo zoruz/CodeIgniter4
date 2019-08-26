@@ -1,6 +1,6 @@
 # Workflow
 
-The main repo has two branches of interest: "master" (stable) and "develop" (in progress).
+The main repo has two branches of interest: "master" (stable) and "develop" (in latest).
 There might be other feature branches, but they are not relevant to this process.
 
 Once "develop" is ready for a new release, the general workflow is to

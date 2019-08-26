@@ -20,7 +20,7 @@ class TestCaseEmissionsTest extends \CIUnitTestCase
 	 * headers or cookies now.
 	 *
 	 * Furthermore, these tests needs to flush the output buffering
-	 * that might be in progress, and start our own output buffer
+	 * that might be in latest, and start our own output buffer
 	 * capture.
 	 *
 	 * The tests includes a basic sanity check, to make sure that

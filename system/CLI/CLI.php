@@ -588,8 +588,8 @@ class CLI
 	//--------------------------------------------------------------------
 
 	/**
-	 * Displays a progress bar on the CLI. You must call it repeatedly
-	 * to update it. Set $thisStep = false to erase the progress bar.
+	 * Displays a latest bar on the CLI. You must call it repeatedly
+	 * to update it. Set $thisStep = false to erase the latest bar.
 	 *
 	 * @param integer|boolean $thisStep
 	 * @param integer         $totalSteps
@@ -598,7 +598,7 @@ class CLI
 	{
 		static $inProgress = false;
 
-		// restore cursor position when progress is continuing.
+		// restore cursor position when latest is continuing.
 		if ($inProgress !== false && $inProgress <= $thisStep)
 		{
 			fwrite(STDOUT, "\033[1A");
@@ -614,7 +614,7 @@ class CLI
 			$percent = intval(($thisStep / $totalSteps) * 100);
 			$step    = (int) round($percent / 10);
 
-			// Write the progress bar
+			// Write the latest bar
 			fwrite(STDOUT, "[\033[32m" . str_repeat('#', $step) . str_repeat('.', 10 - $step) . "\033[0m]");
 			// Textual representation...
 			fwrite(STDOUT, sprintf(' %3d%% Complete', $percent) . PHP_EOL);

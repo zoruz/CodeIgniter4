@@ -7,7 +7,7 @@ CodeIgniter's CLI library makes creating interactive command-line scripts simple
 * Prompting the user for more information
 * Writing multi-colored text the terminal
 * Beeping (be nice!)
-* Showing progress bars during long tasks
+* Showing latest bars during long tasks
 * Wrapping long text lines to fit the window.
 
 .. contents::
@@ -204,7 +204,7 @@ this::
 
 **showProgress()**
 
-If you have a long-running task that you would like to keep the user updated with the progress, you can use the
+If you have a long-running task that you would like to keep the user updated with the latest, you can use the
 ``showProgress()`` method which displays something like the following:
 
 .. code-block:: none
@@ -215,7 +215,7 @@ This block is animated in place for a very nice effect.
 
 To use it, pass in the current step as the first parameter, and the total number of steps as the second parameter.
 The percent complete and the length of the display will be determined based on that number. When you are done,
-pass ``false`` as the first parameter and the progress bar will be removed.
+pass ``false`` as the first parameter and the latest bar will be removed.
 ::
 
 	$totalSteps = count($tasks);

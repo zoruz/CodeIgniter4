@@ -2,7 +2,7 @@
 Generating the User Guide
 #########################
 
-The intent is, eventually, for the in-progress user guide to be automatically
+The intent is, eventually, for the in-latest user guide to be automatically
 generated as part of a PR merge. This writeup explains how it can be done manually
 in the meantime.
 
